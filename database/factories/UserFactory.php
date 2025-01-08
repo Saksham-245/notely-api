@@ -29,7 +29,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'profile_picture' => fake()->imageUrl(),
+            'profile_picture' => 'https://avatars.githubusercontent.com/u/' . fake()->numberBetween(1, 50000),
         ];
     }
 

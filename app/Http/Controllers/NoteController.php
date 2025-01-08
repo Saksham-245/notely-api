@@ -55,4 +55,13 @@ class NoteController extends Controller
         $note->delete();
         return response()->json(['s' => true, 'message' => 'Note deleted successfully']);
     }
+
+    public function search(Request $request)
+    {
+        $notes = Note::where('user_id', $request->user()->id)
+            ->where('title', 'like', '%' . $request->query('query') . '%')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        return response()->json(['notes' => $notes]);
+    }
 }

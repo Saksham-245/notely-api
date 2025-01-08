@@ -9,6 +9,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+Route::get('notes/search', [NoteController::class, 'search'])->middleware('auth:sanctum');
+Route::post('user/upload-profile-picture', [UserController::class, 'uploadProfilePicture'])->middleware('auth:sanctum');
 Route::apiResource('notes', NoteController::class)->middleware('auth:sanctum');
 
 Route::prefix('auth')->group(function () {

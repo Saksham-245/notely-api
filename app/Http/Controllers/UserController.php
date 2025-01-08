@@ -67,6 +67,14 @@ class UserController extends Controller
         return response()->json(['s' => true, 'message' => 'Profile updated successfully', 'user' => $user]);
     }
 
+    public function uploadProfilePicture(Request $request)
+    {
+        $user = User::find($request->user()->id);
+        $user->profile_picture = $request->file('profile_picture')->store('profile_pictures', 'public');
+        $user->save();
+        return response()->json(['s' => true, 'message' => 'Profile picture uploaded successfully', 'url' => $user->profile_picture]);
+    }
+
     public function logout(Request $request)
     {
         $token = $request->bearerToken();
