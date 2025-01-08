@@ -10,76 +10,116 @@ class UserController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
+        try {
+            $request->validate([
+                'email' => 'required|string|email',
+                'password' => 'required|string',
+            ]);
 
-        $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
-            return response()->json(['s' => false, 'message' => 'Invalid credentials'], 401);
+            if (!$user) {
+                return response()->json(['s' => false, 'message' => 'Invalid credentials'], 401);
+            }
+
+            if (!Hash::check($request->password, $user->password)) {
+                return response()->json(['s' => false, 'message' => 'Invalid credentials'], 401);
+            }
+
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json(['s' => true, 'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'profile_picture' => $user->profile_picture,
+            ], 'token' => $token], 200);
+        } catch (\Throwable $th) {
+            throw new \Exception('An error occurred while logging in');
         }
-
-        if (!Hash::check($request->password, $user->password)) {
-            return response()->json(['s' => false, 'message' => 'Invalid credentials'], 401);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json(['s' => true, 'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'profile_picture' => $user->profile_picture,
-        ], 'token' => $token], 200);
     }
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'profile_picture' => 'nullable|string|url',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+                'profile_picture' => 'nullable|string|url',
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'profile_picture' => $request->profile_picture,
-        ]);
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'profile_picture' => $request->profile_picture,
+            ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json(['s' => true, 'message' => 'User created successfully', 'user' => $user, 'token' => $token], 201);
+            return response()->json(['s' => true, 'message' => 'User created successfully', 'user' => $user, 'token' => $token], 201);
+        } catch (\Throwable $th) {
+            throw new \Exception('An error occurred while registering');
+        }
     }
 
     public function updateProfile(Request $request)
     {
-        $user = $request->user();
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'profile_picture' => $request->profile_picture,
-        ]);
-        return response()->json(['s' => true, 'message' => 'Profile updated successfully', 'user' => $user]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users,email,' . $request->user()->id,
+                'profile_picture' => 'nullable|string|url',
+            ]);
+
+            $user = $request->user();
+            $user->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'profile_picture' => $request->profile_picture,
+            ]);
+            return response()->json(['s' => true, 'message' => 'Profile updated successfully', 'user' => $user]);
+        } catch (\Throwable $th) {
+            throw new \Exception('An error occurred while updating the profile');
+        }
     }
 
     public function uploadProfilePicture(Request $request)
     {
-        $user = User::find($request->user()->id);
-        $user->profile_picture = $request->file('profile_picture')->store('profile_pictures', 'public');
-        $user->save();
-        return response()->json(['s' => true, 'message' => 'Profile picture uploaded successfully', 'url' => $user->profile_picture]);
+        try {
+            $request->validate([
+                'profile_picture' => 'required|image|max:2048' // 2MB max size
+            ]);
+
+            if ($request->file('profile_picture')->getSize() > 2048 * 1024) {
+                return response()->json([
+                    's' => false,
+                    'message' => 'Image file is too large. Maximum size is 2MB.'
+                ], 400);
+            }
+
+            $user = User::find($request->user()->id);
+
+            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+            $url = asset('storage/' . $path);
+
+            return response()->json([
+                's' => true,
+                'message' => 'Profile picture uploaded successfully',
+                'url' => $url
+            ]);
+        } catch (\Throwable $th) {
+            throw new \Exception('An error occurred while uploading the profile picture');
+        }
     }
 
     public function logout(Request $request)
     {
-        $token = $request->bearerToken();
-        if (!$token) {
-            return response()->json(['s' => false, 'message' => 'No token provided'], 401);
+        try {
+            $token = $request->bearerToken();
+            if (!$token) {
+                return response()->json(['s' => false, 'message' => 'No token provided'], 401);
         }
 
         $user = $request->user();
@@ -95,8 +135,11 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'profile_picture' => $user->profile_picture,
-            ]
-        ], 200);
+                    'profile_picture' => $user->profile_picture,
+                ]
+            ], 200);
+        } catch (\Throwable $th) {
+            throw new \Exception('An error occurred while logging out');
+        }
     }
 }
