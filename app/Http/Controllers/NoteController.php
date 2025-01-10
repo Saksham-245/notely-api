@@ -30,7 +30,32 @@ class NoteController extends Controller
      *     path="/api/notes",
      *     summary="Create a new note",
      *     tags={"Notes"},
-     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/Note"))
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/Note")),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Note created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="s", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Note created successfully"),
+     *             @OA\Property(property="note", ref="#/components/schemas/Note")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="s", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Note creation failed")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="s", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthorized: Cannot create notes for other users")
+     *         )
+     *     )
      * )
      */
     public function store(Request $request)
