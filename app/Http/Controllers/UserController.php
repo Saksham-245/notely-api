@@ -8,6 +8,30 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    /**
+     * @OA\Post(
+     *     path="/api/auth/login",
+     *     summary="User login",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="password", type="string", format="password")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Login successful",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="s", type="boolean", example=true),
+     *             @OA\Property(property="user", type="object"),
+     *             @OA\Property(property="token", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Invalid credentials")
+     * )
+     */
     public function login(Request $request)
     {
         try {
@@ -38,7 +62,33 @@ class UserController extends Controller
             throw new \Exception('An error occurred while logging in');
         }
     }
-
+    /**
+     * @OA\Post(
+     *     path="/api/auth/register",
+     *     summary="Register new user",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="password", type="string", format="password"),
+     *             @OA\Property(property="profile_picture", type="string", format="url")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User registered successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="s", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string"),
+     *             @OA\Property(property="user", type="object"),
+     *             @OA\Property(property="token", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Validation error")
+     * )
+     */
     public function register(Request $request)
     {
         try {
@@ -120,21 +170,21 @@ class UserController extends Controller
             $token = $request->bearerToken();
             if (!$token) {
                 return response()->json(['s' => false, 'message' => 'No token provided'], 401);
-        }
+            }
 
-        $user = $request->user();
-        if (!$user) {
-            return response()->json(['s' => false, 'message' => 'Invalid token'], 401);
-        }
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['s' => false, 'message' => 'Invalid token'], 401);
+            }
 
-        $user->currentAccessToken()->delete();
-        return response()->json([
-            's' => true,
-            'message' => 'Logout successful',
-            'user_id' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
+            $user->currentAccessToken()->delete();
+            return response()->json([
+                's' => true,
+                'message' => 'Logout successful',
+                'user_id' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
                     'profile_picture' => $user->profile_picture,
                 ]
             ], 200);
