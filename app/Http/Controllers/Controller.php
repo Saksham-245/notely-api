@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 /**
  * @OA\Info(
  *     version="1.0.0",
- *     title="Notely API Documentation",
- *     description="Modern REST API for managing notes",
+ *     title="Notes API Documentation",
+ *     description="API documentation for Notes application"
  * )
  *
  * @OA\Server(
@@ -17,7 +17,8 @@ namespace App\Http\Controllers;
  * @OA\SecurityScheme(
  *     securityScheme="bearerAuth",
  *     type="http",
- *     scheme="bearer"
+ *     scheme="bearer",
+ *     bearerFormat="JWT"
  * )
  */
 abstract class Controller
