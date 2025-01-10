@@ -114,6 +114,22 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/user/update",
+     *     summary="Update user profile",
+     *     tags={"User"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="profile_picture", type="string", format="url")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Profile updated successfully")
+     * )
+     */
     public function updateProfile(Request $request)
     {
         try {
@@ -135,6 +151,20 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/user/upload",
+     *     summary="Upload user profile picture",
+     *     tags={"User"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="profile_picture", type="string", format="url")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Profile picture uploaded successfully")
+     * )
+     */
     public function uploadProfilePicture(Request $request)
     {
         try {
@@ -164,6 +194,14 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/auth/logout",
+     *     summary="Logout user",
+     *     tags={"Authentication"},
+     *     @OA\Response(response=200, description="Logout successful")
+     * )
+     */
     public function logout(Request $request)
     {
         try {
