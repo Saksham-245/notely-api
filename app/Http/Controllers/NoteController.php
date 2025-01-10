@@ -7,6 +7,14 @@ use Illuminate\Http\Request;
 
 class NoteController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/notes",
+     *     summary="Get all notes",
+     *     tags={"Notes"},
+     *     @OA\Response(response=200, description="List of notes")
+     * )
+     */
     public function index(Request $request)
     {
         try {
@@ -17,6 +25,14 @@ class NoteController extends Controller
         }
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/notes",
+     *     summary="Create a new note",
+     *     tags={"Notes"},
+     *     @OA\RequestBody(required=true, @OA\JsonContent(ref="#/components/schemas/Note"))
+     * )
+     */
     public function store(Request $request)
     {
         try {
@@ -44,6 +60,14 @@ class NoteController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/notes/{id}",
+     *     summary="Get a specific note",
+     *     tags={"Notes"},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Note ID", @OA\Schema(type="integer"))
+     * )
+     */
     public function show(Note $note)
     {
         try {
@@ -53,6 +77,14 @@ class NoteController extends Controller
         }
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/notes/{id}",
+     *     summary="Update a specific note",
+     *     tags={"Notes"},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Note ID", @OA\Schema(type="integer"))
+     * )
+     */
     public function update(Request $request, Note $note)
     {
         try {
@@ -63,6 +95,14 @@ class NoteController extends Controller
         }
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/api/notes/{id}",
+     *     summary="Delete a specific note",
+     *     tags={"Notes"},
+     *     @OA\Parameter(name="id", in="path", required=true, description="Note ID", @OA\Schema(type="integer"))
+     * )
+     */
     public function destroy(Request $request, Note $note)
     {
         try {
@@ -76,6 +116,14 @@ class NoteController extends Controller
         }
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/notes/search",
+     *     summary="Search for notes",
+     *     tags={"Notes"},
+     *     @OA\Parameter(name="query", in="query", required=true, description="Search query", @OA\Schema(type="string"))
+     * )
+     */
     public function search(Request $request)
     {
         try {
